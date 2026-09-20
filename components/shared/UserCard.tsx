@@ -46,16 +46,16 @@ const UserCard = ({ userData }: UserCardProps) => {
           </div>
 
           <div className="flex items-center gap-6 text-right">
-            <div className="flex flex-col uppercase">
+            <div className="flex flex-col uppercase text-left">
               <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-white">DEVOPS AFRICA</h1>
-              <p className="text-[10px] font-bold text-zinc-500 tracking-[0.2em] leading-tight">
-                DEVOPS AFRICA LTD<br />WELFARE PROGRAM
+              <p className="mt-1 text-xs font-black text-white/80 tracking-[0.2em] leading-tight">
+                 &nbsp;EMPLOYEE MANAGEMENT SYSTEM
               </p>
             </div>
             <div className="p-3 rounded-2xl bg-emerald-500/10 backdrop-blur-md">
               <Image
-                src="/assets/images/logo.png"
-                alt="DEVOPS AFRICA logo"
+                src="/assets/images/dem-logo.svg"
+                alt="DEM logo"
                 width={56}
                 height={56}
                 className="object-contain"
@@ -77,7 +77,7 @@ const UserCard = ({ userData }: UserCardProps) => {
             <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
               Current Month
             </p>
-            <p className="text-sm font-bold text-emerald-500 uppercase tracking-wider">
+            <p className="text-sm font-bold text-[#D3A94C] uppercase tracking-wider">
               {currentMonth}
             </p>
           </div>
@@ -87,7 +87,7 @@ const UserCard = ({ userData }: UserCardProps) => {
             </p>
             <div className="flex items-center gap-2 justify-end">
               <div className={`w-1.5 h-1.5 rounded-full ${currentMonthContributions ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
-              <p className={`text-sm font-bold uppercase tracking-wider ${currentMonthContributions ? "text-emerald-500" : "text-orange-500"}`}>
+              <p className="text-sm font-bold uppercase tracking-wider text-[#D3A94C]">
                 {currentMonthContributions ? "PAID" : "PENDING"}
               </p>
             </div>

@@ -3,7 +3,7 @@ import Image from "next/image"
 import { type ReactNode } from "react"
 import { Home } from 'lucide-react'
 import Link from "next/link"
-import { COMPANY_LEGAL_NAME, PLATFORM_NAME } from "@/lib/brand"
+import { PLATFORM_NAME } from "@/lib/brand"
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -74,28 +74,25 @@ const AuthLayout = ({ children, description, secondaryDescription, teamImage, cl
           </div>
 
           {/* Right Column: Info Section */}
-          <div className="hidden lg:flex flex-col justify-center space-y-6 text-white pl-8">
-            <div className="flex items-center gap-6">
+          <div className="hidden lg:flex flex-col justify-center space-y-4 text-white pl-8">
+            <div className="flex items-center gap-4">
               <div className="space-y-1">
                 <h2 className="text-3xl font-black tracking-tighter leading-tight">{title}</h2>
-                <div className="text-sm font-bold tracking-[0.1em] text-white/80 uppercase">
-                  {COMPANY_LEGAL_NAME}
-                </div>
               </div>
-              <div className="relative size-24 bg-[#10b981] rounded-full flex items-center justify-center overflow-hidden">
+              <div className="relative size-20 flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/assets/images/logo.png"
-                  alt="DevOps Africa logo"
-                  width={120}
-                  height={120}
-                  className="object-contain brightness-0 invert opacity-40 scale-150"
+                  src="/assets/images/dem-logo.svg"
+                  alt="DEM logo"
+                  width={80}
+                  height={80}
+                  className="object-contain"
                 />
               </div>
             </div>
 
-            <div className="w-full h-px bg-white/10 my-4" />
+            <div className="w-full h-px bg-white/10" />
 
-            <div className="space-y-8">
+            <div className="space-y-4">
               <p className="text-white/80 text-lg leading-relaxed font-light">
                 {description}
               </p>
