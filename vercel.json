@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/notifications?type=active",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/notifications?type=food-reminder",
+      "schedule": "0 9 * * *"
     }
   ]
 }

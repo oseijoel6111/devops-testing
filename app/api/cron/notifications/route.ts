@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { notifyUpcomingEvents, notifyActiveEvents, sendEngagementReminder } from '@/lib/actions/notification.actions'
+import { sendSelectionReminders } from '@/lib/actions/foodMenu.actions'
 
 /**
  * Cron job endpoint for sending automated notifications
@@ -9,6 +10,7 @@ import { notifyUpcomingEvents, notifyActiveEvents, sendEngagementReminder } from
  * - Upcoming events: Run daily at 9 AM
  * - Active events: Run daily at 8 AM
  * - Engagement reminders: Run weekly on Monday at 9 AM
+ * - Food selection reminders (type=food-reminder): Run daily; reminds users once per menu closing within 24h
  */
 export async function GET(request: Request) {
   try {
@@ -25,6 +27,7 @@ export async function GET(request: Request) {
       upcomingEvents?: Awaited<ReturnType<typeof notifyUpcomingEvents>>
       activeEvents?: Awaited<ReturnType<typeof notifyActiveEvents>>
       engagementReminder?: Awaited<ReturnType<typeof sendEngagementReminder>>
+      foodSelectionReminders?: Awaited<ReturnType<typeof sendSelectionReminders>>
     } = {}
 
     // Send notifications based on type
@@ -38,6 +41,10 @@ export async function GET(request: Request) {
 
     if (type === 'reminder') {
       results.engagementReminder = await sendEngagementReminder()
+    }
+
+    if (type === 'food-reminder') {
+      results.foodSelectionReminders = await sendSelectionReminders()
     }
 
     return NextResponse.json({

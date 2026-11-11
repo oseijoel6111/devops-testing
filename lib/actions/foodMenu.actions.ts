@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "../prisma";
-import { createNotificationForAllUsers } from "./notification.actions";
+import { createNotification, createNotificationForAllUsers } from "./notification.actions";
 import { getAuthAppUrl } from "../auth-app-url";
 import { sendEmail } from "../email";
 import { foodMenuPublishedTemplate, foodSelectionReminderTemplate } from "../email-templates";
 import { requireFoodCommitteeOrAdmin, requireAuthenticatedUser } from '@/lib/security';
 import { isValidPrismaId, sanitizeText } from '@/lib/utils/validators';
+import { runAfterResponse } from '@/lib/background-work';
+import { deliverFoodMenuWhatsApp } from '@/lib/jobs/food-menu-whatsapp';
 
 // ============================================
 // WEEKLY FOOD MENU MANAGEMENT
@@ -368,7 +370,7 @@ export async function publishFoodMenu(menuId: string) {
     // Get all active users
     const users = await prisma.user.findMany({
       where: { isActive: true },
-      select: { id: true, email: true, name: true }
+      select: { id: true, email: true, name: true, firstName: true, phoneNumber: true }
     });
 
     // Create notifications for all users
@@ -415,6 +417,9 @@ export async function publishFoodMenu(menuId: string) {
     } else {
       console.log(`Successfully sent ${users.length} email notifications`);
     }
+
+    // WhatsApp DMs are paced by the worker, so hand them off after the response.
+    runAfterResponse(() => deliverFoodMenuWhatsApp({ event: 'published', menu, users }));
 
     revalidatePath('/admin/food-management/menus');
     revalidatePath('/food-orders');
@@ -561,7 +566,7 @@ export async function sendSelectionReminders() {
       // Get users who haven't made selections
       const allUsers = await prisma.user.findMany({
         where: { isActive: true },
-        select: { id: true, email: true, name: true }
+        select: { id: true, email: true, name: true, firstName: true, phoneNumber: true }
       });
 
       const usersWithSelections = await prisma.foodSelection.findMany({
@@ -573,9 +578,10 @@ export async function sendSelectionReminders() {
       const userIdsWithSelections = new Set(usersWithSelections.map((s) => s.userId));
       const usersWithoutSelections = allUsers.filter((u) => !userIdsWithSelections.has(u.id));
 
-      // Send reminders
-      const notificationPromises = usersWithoutSelections.map(() =>
-        createNotificationForAllUsers({
+      // Send in-app reminders to users who haven't made selections
+      const notificationPromises = usersWithoutSelections.map((user) =>
+        createNotification({
+          userId: user.id,
           type: 'FOOD_SELECTION_REMINDER',
           title: 'Reminder: Food Selection Deadline Approaching',
           message: `Don't forget to make your food selections for ${menu.vendor.name}. Deadline: ${menu.selectionCloseDate.toLocaleDateString()}.`,
@@ -606,6 +612,9 @@ export async function sendSelectionReminders() {
       } else {
         console.log(`Successfully sent ${usersWithoutSelections.length} reminder emails for menu ${menu.id}`);
       }
+
+      // Awaited here because this runs from a cron route, not a server action.
+      await deliverFoodMenuWhatsApp({ event: 'reminder', menu, users: usersWithoutSelections });
 
       // Mark reminder as sent
       await prisma.weeklyFoodMenu.update({
